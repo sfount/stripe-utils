@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+const dotenv = require('dotenv').config({ path: './../.env' })
+const program = require('commander')
+const logger = require('./../lib/logger')
+const charges = require('./../utils/charges')
+
+// any options (none set) are passed into cmd
+const requestNewCharge = async function requestNewCharge (amount, cmd) {
+  logger.info(`[scripts/stripe] Create new charge request for ${amount}`)
+  try {
+    const result = await charges.create(amount)
+    logger.info(`[scripts/stripe] New charge created ${result.charge.id}`)
+  } catch (error) {
+    logger.error('[scripts/stripe] Charge request failed ', error)
+  }
+}
+
+const requestRefund = async function requestRefund (chargeID, cmd) {
+  logger.info(`[scripts/stripe] Requesting refund for charge ${chargeID}`)
+  try {
+    const result = await charges.refund(chargeID)
+    logger.info(`[scripts/stripe] Refund completed ${result.refund.id}`)
+  } catch (error) {
+    logger.error('[scripts/stripe] Refund request failed ', error)
+  }
+}
+
+program
+  .version('1.0.0')
+
+program
+  .command('charge <amount>')
+  .action(requestNewCharge)
+
+program
+  .command('refund <chargeID>')
+  .action(requestRefund)
+
+program.parse(process.argv)

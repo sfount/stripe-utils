@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+const dotenv = require('dotenv').config({ path: './../.env' })
+const program = require('commander')
+const logger = require('./../lib/logger')
+const recover = require('./../utils/recover')
+
+// ensure local data is up to date with test accounts
+const syncLocalAccount = async function syncLocalAccount () {
+  logger.info(`[scripts/recover] syncing local environment to account ${process.env.STRIPE_PLATFORM_ACCOUNT_ID}`)
+  try {
+    const result = await recover.account()
+    logger.info('[scripts/recover] sync complete')
+  } catch (error) {
+    logger.error('[scripts/recover] sync failed ', error)
+  }
+}
+
+const syncPayouts = async function syncPayouts () {
+  logger.info(`[scripts/recover] syncing local environment payouts for account ${process.env.STRIPE_PLATFORM_ACCOUNT_ID}`)
+  try {
+    const result = await recover.payouts()
+    logger.info('[scripts/recover] payouts sync complete')
+  } catch (error) {
+    logger.error('[scripts/recover] payouts sync failed ', error)
+  }
+}
+
+
+program
+  .version('1.0.0')
+
+program
+  .command('account')
+  .action(syncLocalAccount)
+
+program
+  .command('payouts')
+  .action(syncPayouts)
+
+program.parse(process.argv)
