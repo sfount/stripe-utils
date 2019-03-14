@@ -1,3 +1,6 @@
+const moment = require('moment')
+const _ = require('lodash')
+
 const { stripe, ACCOUNT_ID, PLATFORM_ACCOUNT_ID } = require('./../lib/stripe')
 const logger = require('./../lib/logger')
 const store = require('./../lib/store')
@@ -26,7 +29,7 @@ const chargePlatform = async function chargePlatform (amount, fundsImmediatelyAv
 }
 
 const calculateFees = function calculateFees (charge) {
-  const applicationFeePercentage = 0.8
+  const applicationFeePercentage = 0.08
   const applicationFeeAmount = Math.ceil((applicationFeePercentage / 100) * charge.amount)
 
   const fee = { stripe: charge.balance_transaction.fee, application: applicationFeeAmount }
@@ -93,7 +96,7 @@ const refundPlatform = async function refundPlatform (chargeId) {
 	logger.debug('%O', refund)
 
 	store.get('refunds')
-		.push({ id: refund.id, charge: refund.charge, amount: refund.amount, stripe_transaction_id: refund.balance_transaction.id, created: refund.created })
+		.push({ id: refund.id, charge: refund.charge, total: refund.amount, fees: 0, net: refund.amount, stripe_transaction_id: refund.balance_transaction.id, created: refund.created })
 		.write()
 
 	logger.info(`Refund ${refund.id} for charge ${refund.charge} written to local JSON store`)
@@ -135,8 +138,48 @@ const transferRefundFromConnect = async function transferRefundFromConnect (refu
 	return transfer
 }
 
-const create = async function create (amount) {
-  const charge = await chargePlatform(amount)
+const timestamps = function timestamps (charge) {
+  charge.date = moment.unix(charge.created).calendar()
+  return charge
+}
+
+const currencies = function currencies (charge) {
+  charge.total = (charge.total / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' })
+  charge.fees = (charge.fees / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' })
+  charge.net = (charge.net / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' })
+  return charge
+}
+
+// read local charges and format for display
+const format = function format () {
+  const chargesIn = store.read().get('charges').value()
+  const refundsIn = store.read().get('refunds').value()
+  const raw = refundsIn
+    .map((refund) => {
+      refund.total = -refund.total
+      refund.net = -refund.net
+      refund.fees = -refund.fees
+      return refund
+    })
+    .concat(chargesIn)
+
+  const totals = {
+    amount: (_.sumBy(raw, 'total') / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' }),
+    fees: (_.sumBy(raw, 'fees') / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' }),
+    net: (_.sumBy(raw, 'net') / 100).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' })
+  }
+
+  const formatted = raw
+    .map(timestamps)
+    .map(currencies)
+
+  const transactions = _.sortBy(formatted, 'created')
+
+  return { transactions, totals }
+}
+
+const create = async function create (amount, fundsImmediatelyAvailable = false) {
+  const charge = await chargePlatform(amount, fundsImmediatelyAvailable)
   const transfer = await transferToConnect(charge)
   return { charge, transfer }
 }
@@ -147,4 +190,4 @@ const refund = async function refund (chargeId) {
 	return { refund: platformRefund, transfer }
 }
 
-module.exports = { create, refund }
+module.exports = { create, refund, format }

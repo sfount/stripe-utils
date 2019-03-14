@@ -1,0 +1,33 @@
+doctype html 
+html(lang="en")
+  head
+    title="Transactions (Prototype)"
+
+  body
+    h1 Charges
+    div
+      table
+        thead
+          tr
+            th ID
+            th Amount
+            th Fees
+            th Net
+            th Created
+        tbody
+          each transaction in transactions
+            tr
+              td
+                code= transaction.id
+              td= transaction.total
+              td (#{transaction.fees})
+              td= transaction.net
+              td= transaction.date
+          
+          tr 
+            td Totals
+            td= totals.amount
+            td (#{totals.fees})
+            td= totals.net
+            
+            

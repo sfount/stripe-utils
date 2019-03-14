@@ -57,7 +57,9 @@ const syncRefundsFromPlatformAccount = async function getRefundsFromPlatformAcco
       .push({
         id: refund.id,
         charge: refund.charge,
-        amount: refund.amount,
+        total: refund.amount,
+        fees: 0,
+        net: refund.amount,
         stripe_transaction_id: refund.balance_transaction,
         created: refund.created,
         stripe_connect_transfer_id: connectTransfer.id,

@@ -8,7 +8,7 @@ const charges = require('./../utils/charges')
 const requestNewCharge = async function requestNewCharge (amount, cmd) {
   logger.info(`[scripts/stripe] Create new charge request for ${amount}`)
   try {
-    const result = await charges.create(amount)
+    const result = await charges.create(amount, cmd.available)
     logger.info(`[scripts/stripe] New charge created ${result.charge.id}`)
   } catch (error) {
     logger.error('[scripts/stripe] Charge request failed ', error)
@@ -30,6 +30,7 @@ program
 
 program
   .command('charge <amount>')
+  .option('-a, --available', 'Make funds immediately available')
   .action(requestNewCharge)
 
 program
