@@ -4,11 +4,17 @@ const program = require('commander')
 const logger = require('./../lib/logger')
 const charges = require('./../utils/charges')
 
+const METHODS = {
+  TRANSFER_NET: { charge: charges.create, refund: charges.refund },
+  DEBIT_FEE: { charge: charges.createDebitFee, refund: charges.refundDebitFee }
+}
+const method = METHODS.TRANSFER_NET
+
 // any options (none set) are passed into cmd
 const requestNewCharge = async function requestNewCharge (amount, cmd) {
   logger.info(`[scripts/stripe] Create new charge request for ${amount}`)
   try {
-    const result = await charges.create(amount, cmd.available)
+    const result = await method.charge(amount, cmd.available)
     logger.info(`[scripts/stripe] New charge created ${result.charge.id}`)
   } catch (error) {
     logger.error('[scripts/stripe] Charge request failed ', error)
@@ -18,7 +24,7 @@ const requestNewCharge = async function requestNewCharge (amount, cmd) {
 const requestRefund = async function requestRefund (chargeID, cmd) {
   logger.info(`[scripts/stripe] Requesting refund for charge ${chargeID}`)
   try {
-    const result = await charges.refund(chargeID)
+    const result = await method.refund(chargeID)
     logger.info(`[scripts/stripe] Refund completed ${result.refund.id}`)
   } catch (error) {
     logger.error('[scripts/stripe] Refund request failed ', error)

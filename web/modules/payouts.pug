@@ -1,0 +1,39 @@
+doctype html 
+html(lang="en")
+  head
+    title="Pay Lite"
+  body
+    h1 Payouts
+    div
+      a(href="/transactions") Transactions
+      a(href="/payouts" style="margin-left: 10px") Payouts
+    div
+      table
+        thead
+          tr
+            th ID
+            th Gross
+            th Fees
+            th Refunds
+            th Net
+            th Transactions
+            th Date
+        tbody
+          each payout in payouts
+            tr
+              td
+                code= payout.id
+              td= payout.charges
+              td (#{payout.fees})
+              td (#{payout.refunds})
+              td= payout.net
+              td
+                a(href=`/transactions?payout=${payout.id}`)
+                  code= payout.id
+              td= payout.date
+          
+          // tr 
+          //   td Totals
+          //   td= totals.amount
+          //   td (#{totals.fees})
+          //   td= totals.net

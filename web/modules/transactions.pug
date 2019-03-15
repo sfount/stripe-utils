@@ -1,10 +1,17 @@
 doctype html 
 html(lang="en")
   head
-    title="Transactions (Prototype)"
-
+    title="Pay Lite"
   body
-    h1 Charges
+    h1 Transactions
+    div
+      a(href="/transactions") Transactions
+      a(href="/payouts" style="margin-left: 10px") Payouts
+    if filtered
+      div 
+        p 
+          span This view is filtered to show only transactions from #{filtered}
+          a(href="/transactions")  Remove filter
     div
       table
         thead
@@ -13,6 +20,9 @@ html(lang="en")
             th Amount
             th Fees
             th Net
+            th Refunded
+            th Settled
+            th Payout
             th Created
         tbody
           each transaction in transactions
@@ -22,6 +32,10 @@ html(lang="en")
               td= transaction.total
               td (#{transaction.fees})
               td= transaction.net
+              td= transaction.refunded
+              td= transaction.settled
+              td
+                code= transaction.payout_id
               td= transaction.date
           
           tr 
