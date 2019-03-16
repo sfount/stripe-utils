@@ -4,6 +4,13 @@ const program = require('commander')
 const logger = require('./../lib/logger')
 const recover = require('./../utils/recover')
 
+const METHODS = {
+  TRANSFER_NET: recover.syncNetTransferPayouts,
+  DEBIT_FEE: recover.syncDebitFeePayouts
+}
+
+const method = METHODS.DEBIT_FEE
+
 // ensure local data is up to date with test accounts
 const syncLocalAccount = async function syncLocalAccount () {
   logger.info(`[scripts/recover] syncing local environment to account ${process.env.STRIPE_PLATFORM_ACCOUNT_ID}`)
@@ -18,7 +25,8 @@ const syncLocalAccount = async function syncLocalAccount () {
 const syncPayouts = async function syncPayouts () {
   logger.info(`[scripts/recover] syncing local environment payouts for account ${process.env.STRIPE_PLATFORM_ACCOUNT_ID}`)
   try {
-    const result = await recover.payouts()
+    // use default environment account for now
+    const result = await method(process.env.STRIPE_ACCOUNT_ID)
     logger.info('[scripts/recover] payouts sync complete')
   } catch (error) {
     logger.error('[scripts/recover] payouts sync failed ', error)

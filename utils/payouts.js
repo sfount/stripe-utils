@@ -14,6 +14,7 @@ const format = function format () {
     payout.net = penceToCurrency(payout.net)
 
     payout.date = moment.unix(payout.created).calendar()
+    payout.title = moment.unix(payout.created).format('dddd, MMMM Do YYYY')
     return payout
   })
   return { payouts: formatted }

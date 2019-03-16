@@ -2,38 +2,37 @@ doctype html
 html(lang="en")
   head
     title="Pay Lite"
+    
+    link(rel="stylesheet" href="/static/normalize.css")
+    link(rel="stylesheet" href="/static/skeleton.css")
+    link(rel="stylesheet" href="/static/pay-lite.css")
   body
     h1 Payouts
     div
       a(href="/transactions") Transactions
       a(href="/payouts" style="margin-left: 10px") Payouts
-    div
-      table
-        thead
-          tr
-            th ID
-            th Gross
-            th Fees
-            th Refunds
-            th Net
-            th Transactions
-            th Date
-        tbody
-          each payout in payouts
+    each payout in payouts
+      div
+        h5(style="margin-bottom: 5px")= payout.title
+        code= payout.id
+        table
+          thead
             tr
-              td
-                code= payout.id
-              td= payout.charges
-              td (#{payout.fees})
-              td (#{payout.refunds})
-              td= payout.net
-              td
-                a(href=`/transactions?payout=${payout.id}`)
-                  code= payout.id
-              td= payout.date
-          
-          // tr 
-          //   td Totals
-          //   td= totals.amount
-          //   td (#{totals.fees})
-          //   td= totals.net
+              th(colspan="2") Costs
+          tbody
+            tr
+              td Total from payments
+              td.right= payout.charges
+            tr
+              td Total taken for fees
+              td.right (#{payout.fees})
+            tr
+              td Total taken for refunds
+              td.right (#{payout.refunds})
+            tr
+              th Total paid out
+              th.right= payout.net
+
+        span 
+          a(href=`/transactions?payout=${payout.id}`) Click here to view transactions
+        p Processed #{payout.date}

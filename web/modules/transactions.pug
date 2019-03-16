@@ -2,6 +2,10 @@ doctype html
 html(lang="en")
   head
     title="Pay Lite"
+
+    link(rel="stylesheet" href="/static/normalize.css")
+    link(rel="stylesheet" href="/static/skeleton.css")
+    link(rel="stylesheet" href="/static/pay-lite.css")
   body
     h1 Transactions
     div
@@ -9,39 +13,88 @@ html(lang="en")
       a(href="/payouts" style="margin-left: 10px") Payouts
     if filtered
       div 
-        p 
-          span This view is filtered to show only transactions from #{filtered}
-          a(href="/transactions")  Remove filter
+        div.box
+          <span class="SVGInline SVGInline--cleaned SVG Icon Icon--filter SVG--color SVG--color--gray500 Box-root Flex-flex" style="transform: translateY(1.07px);"><svg class="SVGInline-svg SVGInline--cleaned-svg SVG-svg Icon-svg Icon--filter-svg SVG--color-svg SVG--color--gray500-svg" style="width: 12px;height: 12px;" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M13.994.004c.555 0 1.006.448 1.006 1a.997.997 0 0 1-.212.614l-5.782 7.39L9 13.726a1 1 0 0 1-.293.708L7.171 15.97A.1.1 0 0 1 7 15.9V9.008l-5.788-7.39A.996.996 0 0 1 1.389.214a1.01 1.01 0 0 1 .617-.21z" fill-rule="evenodd"></path></svg></span>
+          span  Filter
+        span
+          span  Payout: 
+            code= filtered
     div
       table
         thead
           tr
             th ID
-            th Amount
-            th Fees
-            th Net
-            th Refunded
+            th.right Amount
+            th.right Fees
+            th.right Net
+            th.right Refunded
             th Settled
-            th Payout
-            th Created
+            th Date
+            th Meta: Payout
+            th Meta: Application fee
         tbody
-          each transaction in transactions
+          tr
+            th(colspan="9") Charges
+          each charge in charges
             tr
               td
-                code= transaction.id
-              td= transaction.total
-              td (#{transaction.fees})
-              td= transaction.net
-              td= transaction.refunded
-              td= transaction.settled
+                code= charge.id
+              td.right= charge.total
+              td.right (#{charge.fees})
+              td.right= charge.net
               td
-                code= transaction.payout_id
-              td= transaction.date
-          
+                if charge.refunded
+                  span.tag.orange Refunded
+              td
+                if charge.settled
+                  span.tag.green Paid
+              td= charge.date
+              td
+                if charge.payout_id
+                  code= charge.payout_id
+              td.right
+                if charge.fee_details
+                  span (#{charge.fee_details.application})
           tr 
-            td Totals
-            td= totals.amount
-            td (#{totals.fees})
-            td= totals.net
+            th(colspan="2").right= totals.charges.amount
+            th.right (#{totals.charges.fees})
+            th.right= totals.charges.net
+            th(colspan="4")
+            th.right (#{totals.charges.application_fees})
+ 
+          tr 
+            th(colspan="9") Refunds
+          each refund in refunds
+            tr
+              td
+                code= refund.id
+              td.right (#{refund.total})
+              td.right #{refund.fees}
+              td.right (#{refund.net})
+              td
+                if refund.refunded
+                  span.tag.orange Refunded
+              td
+                if refund.settled
+                  span.tag.green Paid
+              td= refund.date
+              td
+                if refund.payout_id
+                  code= refund.payout_id
+              td.right
+                if refund.fee_details
+                  span (#{refund.fee_details.application})
+          tr 
+            th(colspan="2").right= totals.refunds.amount
+            th.right (#{totals.refunds.fees})
+            th.right= totals.refunds.net
+            th(colspan="5")
+
+          tr 
+            th(colspan="2").right= totals.transactions.amount
+            th.right (#{totals.transactions.fees})
+            th.right= totals.transactions.net
+            th(colspan="4")
+            th.right (#{totals.transactions.application_fees})
             
             

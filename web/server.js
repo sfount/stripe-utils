@@ -9,6 +9,8 @@ const app = express()
 app.set('view engine', 'pug')
 app.set('views', './web/modules')
 
+app.use('/static', express.static('web/static'))
+
 const currencyFormat = (amount) => amount.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' })
 
 const transactions = function transactions (req, res) {
@@ -19,7 +21,6 @@ const transactions = function transactions (req, res) {
 
 const listPayouts = function listPayouts (req, res) {
   const context = payouts.format()
-  console.log('context', context)
   res.render('payouts', context)
 }
 
