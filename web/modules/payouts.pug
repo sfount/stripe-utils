@@ -7,10 +7,13 @@ html(lang="en")
     link(rel="stylesheet" href="/static/skeleton.css")
     link(rel="stylesheet" href="/static/pay-lite.css")
   body
-    h1 Payouts
-    div
-      a(href="/transactions") Transactions
-      a(href="/payouts" style="margin-left: 10px") Payouts
+    div.nav 
+      // div.nav-item
+        h5 Pay Lite
+      div.nav-item
+        a(href="/transactions") Transactions
+      div.nav-item.active
+        a(href="/payouts") Payouts
     each payout in payouts
       div
         h5(style="margin-bottom: 5px")= payout.title

@@ -25,10 +25,10 @@ const requestNewCharge = async function requestNewCharge (amount, cmd) {
   }
 }
 
-const requestRefund = async function requestRefund (chargeID, cmd) {
+const requestRefund = async function requestRefund (chargeID, amount, cmd) {
   logger.info(`[scripts/stripe] Requesting refund for charge ${chargeID}`)
   try {
-    const result = await method.refund(chargeID)
+    const result = await method.refund(chargeID, amount)
     logger.info(`[scripts/stripe] Refund completed ${result.refund.id}`)
   } catch (error) {
     logger.error('[scripts/stripe] Refund request failed ', error)
@@ -44,7 +44,7 @@ program
   .action(requestNewCharge)
 
 program
-  .command('refund <chargeID>')
+  .command('refund <chargeID> [amount]')
   .action(requestRefund)
 
 program.parse(process.argv)

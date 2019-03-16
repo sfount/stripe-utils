@@ -7,14 +7,17 @@ html(lang="en")
     link(rel="stylesheet" href="/static/skeleton.css")
     link(rel="stylesheet" href="/static/pay-lite.css")
   body
-    h1 Transactions
-    div
-      a(href="/transactions") Transactions
-      a(href="/payouts" style="margin-left: 10px") Payouts
+    div.nav 
+      // div.nav-item
+        h5 Pay Lite
+      div.nav-item.active
+        a(href="/transactions") Transactions
+      div.nav-item
+        a(href="/payouts") Payouts
     if filtered
-      div 
+      div.spacer
         div.box
-          <span class="SVGInline SVGInline--cleaned SVG Icon Icon--filter SVG--color SVG--color--gray500 Box-root Flex-flex" style="transform: translateY(1.07px);"><svg class="SVGInline-svg SVGInline--cleaned-svg SVG-svg Icon-svg Icon--filter-svg SVG--color-svg SVG--color--gray500-svg" style="width: 12px;height: 12px;" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M13.994.004c.555 0 1.006.448 1.006 1a.997.997 0 0 1-.212.614l-5.782 7.39L9 13.726a1 1 0 0 1-.293.708L7.171 15.97A.1.1 0 0 1 7 15.9V9.008l-5.788-7.39A.996.996 0 0 1 1.389.214a1.01 1.01 0 0 1 .617-.21z" fill-rule="evenodd"></path></svg></span>
+          <span style="transform: translateY(1.07px);"><svg style="width: 12px;height: 12px;" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M13.994.004c.555 0 1.006.448 1.006 1a.997.997 0 0 1-.212.614l-5.782 7.39L9 13.726a1 1 0 0 1-.293.708L7.171 15.97A.1.1 0 0 1 7 15.9V9.008l-5.788-7.39A.996.996 0 0 1 1.389.214a1.01 1.01 0 0 1 .617-.21z" fill-rule="evenodd"></path></svg></span>
           span  Filter
         span
           span  Payout: 
@@ -33,68 +36,70 @@ html(lang="en")
             th Meta: Payout
             th Meta: Application fee
         tbody
-          tr
-            th(colspan="9") Charges
-          each charge in charges
+          each key in ["charges", "refunds"]
             tr
-              td
-                code= charge.id
-              td.right= charge.total
-              td.right (#{charge.fees})
-              td.right= charge.net
-              td
-                if charge.refunded
-                  span.tag.orange Refunded
-              td
-                if charge.settled
-                  span.tag.green Paid
-              td= charge.date
-              td
-                if charge.payout_id
-                  code= charge.payout_id
-              td.right
-                if charge.fee_details
-                  span (#{charge.fee_details.application})
-          tr 
-            th(colspan="2").right= totals.charges.amount
-            th.right (#{totals.charges.fees})
-            th.right= totals.charges.net
-            th(colspan="4")
-            th.right (#{totals.charges.application_fees})
+              th(colspan="9", style="text-transform: capitalize") #{key}
+            each transaction in rows[key].transactions
+              tr
+                td
+                  code= transaction.id
+                td.right= key === "refunds" ? `(${transaction.totalFormat})` : transaction.totalFormat
+                td.right= transaction.fees > 0 ? `(${transaction.feesFormat})` : transaction.feesFormat
+                td.right= key === "refunds" ? `(${transaction.netFormat})` : transaction.netFormat
+                td
+                  if transaction.refunded
+                    span.tag.orange Refunded
+                td
+                  if transaction.settled
+                    span.tag.green Paid
+                td= transaction.date
+                td
+                  if transaction.payout_id
+                    code= transaction.payout_id
+                td.right
+                  if transaction.fee_details
+                    span (#{transaction.fee_details.applicationFormat})
+            tr 
+              th(colspan="2").right= key === "refunds" ? `(${rows[key].totals.amount})` : rows[key].totals.amount
+              th.right (#{rows[key].totals.fees})
+              th.right= key === "refunds" ? `(${rows[key].totals.net})` : rows[key].totals.net
+              th(colspan="4")
+              th.right 
+                if key === "charges" 
+                  span (#{rows[key].totals.application_fees})
  
-          tr 
-            th(colspan="9") Refunds
-          each refund in refunds
-            tr
-              td
-                code= refund.id
-              td.right (#{refund.total})
-              td.right #{refund.fees}
-              td.right (#{refund.net})
-              td
-                if refund.refunded
-                  span.tag.orange Refunded
-              td
-                if refund.settled
-                  span.tag.green Paid
-              td= refund.date
-              td
-                if refund.payout_id
-                  code= refund.payout_id
-              td.right
-                if refund.fee_details
-                  span (#{refund.fee_details.application})
-          tr 
-            th(colspan="2").right= totals.refunds.amount
-            th.right (#{totals.refunds.fees})
-            th.right= totals.refunds.net
-            th(colspan="5")
+          // tr 
+          //   th(colspan="9") Refunds
+          // each refund in refunds
+          //   tr
+          //     td
+          //       code= refund.id
+          //     td.right (#{refund.total})
+          //     td.right #{refund.fees}
+          //     td.right (#{refund.net})
+          //     td
+          //       if refund.refunded
+          //         span.tag.orange Refunded
+          //     td
+          //       if refund.settled
+          //         span.tag.green Paid
+          //     td= refund.date
+          //     td
+          //       if refund.payout_id
+          //         code= refund.payout_id
+          //     td.right
+          //       if refund.fee_details
+          //         span (#{refund.fee_details.application})
+          // tr 
+          //   th(colspan="2").right= totals.refunds.amount
+          //   th.right (#{totals.refunds.fees})
+          //   th.right= totals.refunds.net
+          //   th(colspan="5")
 
           tr 
-            th(colspan="2").right= totals.transactions.amount
-            th.right (#{totals.transactions.fees})
-            th.right= totals.transactions.net
-            th(colspan="4")
-            th.right (#{totals.transactions.application_fees})
+            th(colspan="2").right= totals.amount
+            th.right (#{totals.fees})
+            th.right= totals.net
+            th(colspan="5")
             
             

@@ -204,9 +204,10 @@ const refundPlatform = async function refundPlatform (chargeId) {
 	return refund
 }
 
-const refundWithReverse = async function refundWithReverse(chargeId) {
+const refundWithReverse = async function refundWithReverse(chargeId, amount) {
   const refund = await stripe.refunds.create({
     charge: chargeId,
+    ...amount && { amount },
 		expand: [ 'balance_transaction' ],
     reverse_transfer: true,
     metadata: {
@@ -288,18 +289,52 @@ const timestamps = function timestamps (charge) {
 }
 
 const currencies = function currencies (charge) {
-  charge.total = penceToCurrency(charge.total)
-  charge.fees = penceToCurrency(charge.fees)
-  charge.net = penceToCurrency(charge.net)
+  charge.totalFormat = penceToCurrency(charge.total)
+  charge.feesFormat = penceToCurrency(charge.fees)
+  charge.netFormat = penceToCurrency(charge.net)
 
   if (charge.fee_details) {
-    charge.fee_details.application = penceToCurrency(charge.fee_details.application)
+    charge.fee_details.applicationFormat = penceToCurrency(charge.fee_details.application)
   }
   return charge
 }
 
+const format = function format(payout) {
+  const filter = payout ? { payout_id: payout } : {}
+  const readCharges = store.read().get('charges').filter(filter).value()
+  const readRefunds = store.read().get('refunds').filter(filter).value()
+
+  const calculateTotals = (transactions) => {
+    return {
+      amount: penceToCurrency(_.sumBy(transactions, 'total')),
+      fees: penceToCurrency(_.sumBy(transactions, 'fees')),
+      net: penceToCurrency(_.sumBy(transactions, 'net')),
+      application_fees: penceToCurrency(_.sumBy(transactions, 'fee_details.application'))
+    }
+  }
+
+  const rows = {
+    charges: {
+      totals: calculateTotals(readCharges),
+      transactions: _.sortBy(readCharges.map(timestamps).map(currencies), 'created').reverse()
+    },
+    refunds: {
+      totals: calculateTotals(readRefunds),
+      transactions: _.sortBy(readRefunds.map(timestamps).map(currencies), 'created').reverse()
+    }
+  }
+
+  const totals = {
+    amount: penceToCurrency(_.sumBy(readCharges, 'total') - _.sumBy(readRefunds, 'total')),
+    fees: penceToCurrency(_.sumBy(readCharges, 'fees') - _.sumBy(readRefunds, 'fees')),
+    net: penceToCurrency(_.sumBy(readCharges, 'net') - _.sumBy(readRefunds, 'net')),
+    application_fees: penceToCurrency(_.sumBy(readCharges, 'fee_details.application_fees') - _.sumBy(readRefunds, 'fee_details.application_fees'))
+  }
+  return { rows, totals, filtered: payout }
+}
+
 // read local charges and format for display
-const format = function format (payout) {
+/* const format = function format (payout) {
   const filter = payout ? { payout_id: payout } : {}
   const chargesIn = store.read().get('charges').filter(filter).value()
   let refundsIn = store.read().get('refunds').filter(filter).value()
@@ -345,7 +380,7 @@ const format = function format (payout) {
   // const transactions = _.sortBy(formatted, 'created').reverse()
 
   return { charges: formattedCharges, refunds: formattedRefunds, totals, filtered: payout }
-}
+}*/
 
 const create = async function create (amount, fundsImmediatelyAvailable = false) {
   const charge = await chargePlatform(amount, fundsImmediatelyAvailable)
@@ -365,8 +400,8 @@ const refund = async function refund (chargeId) {
 	return { refund: platformRefund, transfer }
 }
 
-const refundDebitFee = async function refundDebitFee (chargeId) {
-  const chargeRefund = await refundWithReverse(chargeId)
+const refundDebitFee = async function refundDebitFee (chargeId, amount = undefined) {
+  const chargeRefund = await refundWithReverse(chargeId, amount)
   return { refund: chargeRefund }
 }
 
