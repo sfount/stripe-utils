@@ -14,28 +14,29 @@ html(lang="en")
         a(href="/transactions") Transactions
       div.nav-item.active
         a(href="/payouts") Payouts
-    each payout in payouts
-      div
-        h5(style="margin-bottom: 5px")= payout.title
-        code= payout.id
-        table
-          thead
-            tr
-              th(colspan="2") Costs
-          tbody
-            tr
-              td Total from payments
-              td.right= payout.charges
-            tr
-              td Total taken for fees
-              td.right (#{payout.fees})
-            tr
-              td Total taken for refunds
-              td.right (#{payout.refunds})
-            tr
-              th Total paid out
-              th.right= payout.net
+    div.list
+      each payout in payouts
+        div.list-item
+          h5(style="margin-bottom: 5px")= payout.title
+          code= payout.id
+          table
+            thead
+              tr
+                th(colspan="2") Costs
+            tbody
+              tr
+                td Total from payments
+                td.right= payout.charges
+              tr
+                td Total taken for fees
+                td.right (#{payout.fees})
+              tr
+                td Total taken for refunds
+                td.right (#{payout.refunds})
+              tr
+                th Total paid out
+                th.right= payout.net
 
-        span 
-          a(href=`/transactions?payout=${payout.id}`) Click here to view transactions
-        p Processed #{payout.date}
+          span 
+            a(href=`/transactions?payout=${payout.id}`) Click here to view transactions
+          p Processed #{payout.date}

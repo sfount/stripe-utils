@@ -182,6 +182,9 @@ const syncDebitFeePayouts = async function syncDebitFeePayouts (account) {
   const payouts = await pages.all(stripe.payouts, 'list', account)
   logger.info(`A total of ${payouts.length} payout found for account ${account}`)
 
+  store.get('payouts').remove().write()
+  logger.info('Removed existing references to payouts')
+
   for (const payout of payouts) {
     const transactions = await pages.all(stripe.balance, 'listTransactions', account, { payout: payout.id, expand: [ 'data.source', 'data.source.source_transfer', 'data.source.destination_payment' ] })
     const referencedCharges = []
