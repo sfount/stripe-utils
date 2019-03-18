@@ -59,6 +59,10 @@ html(lang="en")
                 td.right
                   if transaction.fee_details
                     span (#{transaction.fee_details.applicationFormat})
+            else
+              tr
+                td(colspan="9") 
+                  i No #{key} listed
             tr 
               th(colspan="2").right= key === "refunds" ? `(${rows[key].totals.amount})` : rows[key].totals.amount
               th.right (#{rows[key].totals.fees})
@@ -67,35 +71,6 @@ html(lang="en")
               th.right 
                 if key === "charges" 
                   span (#{rows[key].totals.application_fees})
- 
-          // tr 
-          //   th(colspan="9") Refunds
-          // each refund in refunds
-          //   tr
-          //     td
-          //       code= refund.id
-          //     td.right (#{refund.total})
-          //     td.right #{refund.fees}
-          //     td.right (#{refund.net})
-          //     td
-          //       if refund.refunded
-          //         span.tag.orange Refunded
-          //     td
-          //       if refund.settled
-          //         span.tag.green Paid
-          //     td= refund.date
-          //     td
-          //       if refund.payout_id
-          //         code= refund.payout_id
-          //     td.right
-          //       if refund.fee_details
-          //         span (#{refund.fee_details.application})
-          // tr 
-          //   th(colspan="2").right= totals.refunds.amount
-          //   th.right (#{totals.refunds.fees})
-          //   th.right= totals.refunds.net
-          //   th(colspan="5")
-
           tr 
             th(colspan="2").right= totals.amount
             th.right (#{totals.fees})

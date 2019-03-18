@@ -299,13 +299,13 @@ const syncDebitFeePayouts = async function syncDebitFeePayouts (account) {
     if (Object.keys(grouped).length > 4) {
       throw new Error('Unkown number of transaction types included in payout')
     }
-    if (stripeTransactionTotals.payment.count !== referencedCharges.length) {
+    if (stripeTransactionTotals.payment && stripeTransactionTotals.payment.count !== referencedCharges.length) {
       throw new Error('Found unaccounted for charges -- unsure of what to do with this information')
     }
-    if (stripeTransactionTotals.payment_refund.count !== referencedRefunds.length) {
+    if (stripeTransactionTotals.payment_refund && stripeTransactionTotals.payment_refund.count !== referencedRefunds.length) {
       throw new Error('Found unaccounted for refunds -- unsure of what to do with this information')
     }
-    if (stripeTransactionTotals.transfer.count !== referencedCharges.length) {
+    if (stripeTransactionTotals.transfer && stripeTransactionTotals.transfer.count !== referencedCharges.length) {
       throw new Error('Found a different number of fee transfers than charges with fees -- unsure of what to do with this information')
     }
   }
