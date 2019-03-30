@@ -79,6 +79,9 @@ const syncNetTransferPayouts = async function syncNetTransferPayouts (account) {
   const payouts = await pages.all(stripe.payouts, 'list', account)
   logger.info(`A total of ${payouts.length} payout found for account ${account}`)
 
+  store.get('payouts').remove().write()
+  logger.info('Removed existing references to payouts')
+
   for (const payout of payouts) {
     const transactions = await pages.all(stripe.balance, 'listTransactions', account, { payout: payout.id, expand: [ 'data.source', 'data.source.source_transfer' ] })
     const referencedCharges = []
@@ -147,7 +150,7 @@ const syncNetTransferPayouts = async function syncNetTransferPayouts (account) {
 
     store.get('payouts')
       .find({ id: payout.id })
-      .assign({ charges: localTotals.charges, fees: localTotals.fees, net: localTotals.charges - localTotals.fees, refunds: localTotals.refunds })
+      .assign({ charges: localTotals.charges, fees: localTotals.fees, net: localTotals.charges - localTotals.fees - localTotals.refunds, refunds: localTotals.refunds })
       .write()
 
     logger.info(`Grouped transactions for this payout are ${stripeTransactionTotals.payment.amount} in charges, ${stripeTransactionTotals.transfer.amount} in refunds, totalling ${stripeTransactionTotals.payout.amount}`)
@@ -283,7 +286,7 @@ const syncDebitFeePayouts = async function syncDebitFeePayouts (account) {
       .assign({ charges: localTotals.charges, fees: localTotals.fees, net: localTotals.charges - localTotals.fees - localTotals.refunds, refunds: localTotals.refunds })
       .write()
 
-    logger.info(`Grouped transactions for this payout are ${stripeTransactionTotals.payment.amount} in charges, ${stripeTransactionTotals.transfer.amount} in refunds, totalling ${stripeTransactionTotals.payout.amount}`)
+    logger.info(`Grouped transactions for this payout are ${stripeTransactionTotals.payment && stripeTransactionTotals.payment.amount} in charges, ${stripeTransactionTotals.transfer && stripeTransactionTotals.transfer.amount} in refunds, totalling ${stripeTransactionTotals.payout.amount}`)
 
     if (stripeTransactionTotals.payment.amount !== (localTotals.charges)) {
       throw new Error('Payout payments and locally referenced charges and fees don\'t line up - we haven\'t planned for supporting any reason for this')

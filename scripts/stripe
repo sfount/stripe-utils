@@ -8,11 +8,7 @@ const charges = require('./../utils/charges')
 // the net amount from platform to Connect because of insufficient funds in the
 // platform, this was likely because of not turning of payouts on the Platform
 // account and not correctly setting source_transaction, this should be proven
-const METHODS = {
-  TRANSFER_NET: { charge: charges.create, refund: charges.refund },
-  DEBIT_FEE: { charge: charges.createDebitFee, refund: charges.refundDebitFee }
-}
-const method = METHODS.DEBIT_FEE
+const method = charges.netTransfer
 
 // any options (none set) are passed into cmd
 const requestNewCharge = async function requestNewCharge (amount, cmd) {

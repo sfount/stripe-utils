@@ -9,7 +9,7 @@ const METHODS = {
   DEBIT_FEE: recover.syncDebitFeePayouts
 }
 
-const method = METHODS.DEBIT_FEE
+const method = METHODS.TRANSFER_NET
 
 // ensure local data is up to date with test accounts
 const syncLocalAccount = async function syncLocalAccount () {
